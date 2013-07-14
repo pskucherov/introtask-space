@@ -142,8 +142,11 @@ Planet.prototype.loadCargoTo = function (vessel, cargoWeight) {
     if (!(vessel instanceof Vessel)) {
         throw new Error("Check loadCargoTo vessel");
     }
-    if (!(vessel.position instanceof Planet)) {
-        throw new Error("Vessel must land on the planet.");
+
+    if (!(vessel.position instanceof Planet) ||
+        (vessel.position.position[0] !== this.position[0] && vessel.position.position[1] !== this.position[1])
+        ) {
+        throw new Error("Vessel must land on the planet " + this.name + "");
     }
     if (typeof cargoWeight !== 'number' || cargoWeight < 0) {
         throw new Error("Check loadCargoTo cargoWeight");
@@ -174,8 +177,10 @@ Planet.prototype.unloadCargoFrom = function (vessel, cargoWeight) {
     if (!(vessel instanceof Vessel)) {
         throw new Error("Check unloadCargoFrom vessel");
     }
-    if (!(vessel.position instanceof Planet)) {
-        throw new Error("Vessel must land on the planet.");
+    if (!(vessel.position instanceof Planet) ||
+        (vessel.position.position[0] !== this.position[0] && vessel.position.position[1] !== this.position[1])
+        ) {
+        throw new Error("Vessel must land on the planet " + this.name + "");
     }
     if (typeof cargoWeight !== 'number' || cargoWeight < 0) {
         throw new Error("Check unloadCargoFrom cargoWeight");
