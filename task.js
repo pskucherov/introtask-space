@@ -50,13 +50,17 @@ Vessel.prototype.report = function () {
  * Выводит количество свободного места на корабле.
  * @name Vessel.getFreeSpace
  */
-Vessel.prototype.getFreeSpace = function () {}
+Vessel.prototype.getFreeSpace = function () {
+    return (this.capacity - this.cargoWeight);
+};
 
 /**
  * Выводит количество занятого места на корабле.
  * @name Vessel.getOccupiedSpace
  */
-Vessel.prototype.getOccupiedSpace = function () {}
+Vessel.prototype.getOccupiedSpace = function () {
+  return this.cargoWeight;
+};
 
 /**
  * Переносит корабль в указанную точку.
@@ -68,7 +72,15 @@ Vessel.prototype.getOccupiedSpace = function () {}
  * vessel.flyTo(earth);
  * @name Vessel.report
  */
-Vessel.prototype.flyTo = function (newPosition) {}
+Vessel.prototype.flyTo = function (newPosition) {
+    if (!(newPosition instanceof Planet) &&
+        (typeof newPosition !== 'object' || newPosition.length !== 2)
+        ) {
+        throw new Error("Check Vessel newPosition");
+    }
+
+    this.position = newPosition;
+};
 
 /**
  * Создает экземпляр планеты.
@@ -90,9 +102,9 @@ function Planet(name, position, availableAmountOfCargo) {
         throw new Error("Check Planet 'availableAmountOfCargo'");
     }
 
-    this.name = name;
+    this.name     = name;
     this.position = position;
-    this.cargo = availableAmountOfCargo;
+    this.cargo    = availableAmountOfCargo;
 
 }
 
@@ -113,7 +125,9 @@ Planet.prototype.report = function () {
  * Возвращает доступное количество груза планеты.
  * @name Vessel.getAvailableAmountOfCargo
  */
-Planet.prototype.getAvailableAmountOfCargo = function () {}
+Planet.prototype.getAvailableAmountOfCargo = function () {
+    return this.cargo;
+};
 
 /**
  * Загружает на корабль заданное количество груза.
@@ -123,7 +137,30 @@ Planet.prototype.getAvailableAmountOfCargo = function () {}
  * @param {Number} cargoWeight Вес загружаемого груза.
  * @name Vessel.loadCargoTo
  */
-Planet.prototype.loadCargoTo = function (vessel, cargoWeight) {}
+Planet.prototype.loadCargoTo = function (vessel, cargoWeight) {
+
+    if (!(vessel instanceof Vessel)) {
+        throw new Error("Check loadCargoTo vessel");
+    }
+    if (!(vessel.position instanceof Planet)) {
+        throw new Error("Vessel must land on the planet.");
+    }
+    if (typeof cargoWeight !== 'number' || cargoWeight < 0) {
+        throw new Error("Check loadCargoTo cargoWeight");
+    }
+
+    if (this.getAvailableAmountOfCargo() < cargoWeight) {
+        throw new Error("On the planet do not have enough cargo.");
+    }
+
+    if (vessel.getFreeSpace() < cargoWeight) {
+        throw new Error("On the vessel do not have enough free space.");
+    }
+
+    vessel.cargoWeight += cargoWeight;
+    this.cargo         -= cargoWeight;
+
+};
 
 /**
  * Выгружает с корабля заданное количество груза.
@@ -133,4 +170,22 @@ Planet.prototype.loadCargoTo = function (vessel, cargoWeight) {}
  * @param {Number} cargoWeight Вес выгружаемого груза.
  * @name Vessel.unloadCargoFrom
  */
-Planet.prototype.unloadCargoFrom = function (vessel, cargoWeight) {}
+Planet.prototype.unloadCargoFrom = function (vessel, cargoWeight) {
+    if (!(vessel instanceof Vessel)) {
+        throw new Error("Check unloadCargoFrom vessel");
+    }
+    if (!(vessel.position instanceof Planet)) {
+        throw new Error("Vessel must land on the planet.");
+    }
+    if (typeof cargoWeight !== 'number' || cargoWeight < 0) {
+        throw new Error("Check unloadCargoFrom cargoWeight");
+    }
+
+    if (vessel.getOccupiedSpace() < cargoWeight) {
+        throw new Error("On the vessel do not have enough cargo.");
+    }
+
+    vessel.cargoWeight -= cargoWeight;
+    this.cargo         += cargoWeight;
+
+};
